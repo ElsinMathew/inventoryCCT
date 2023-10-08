@@ -1,11 +1,11 @@
 <?php
 
 
-include_once("invConfig.php");
+include_once("invCfig.php");
 include_once("../../inc/config/constants.php");
 
 // get invoice list
-function getInvoicess() {
+function getInvoices() {
 
 	// Connect to the database
 	$mysqli = new mysqli(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE_NAME);
