@@ -466,10 +466,10 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                 </div>
                 <div class="col-md-6 d-flex justify-content-end align-items-center">
                   <i class="far fa-calendar-alt me-2"></i>
-                  <?php $StockQuerysql = "SELECT itemName, stock, createdOn FROM item WHERE stock < 10 ORDER BY stock ASC LIMIT 3";
+                  <?php $StockQuerysql = "SELECT itemName, stock FROM item WHERE stock < 10 ORDER BY stock ASC LIMIT 3";
                     $StockDetails=$conn->prepare($StockQuerysql);
                     $StockDetails->execute();
-                    $UpStockQuerysql = "SELECT itemName, stock, createdOn FROM item WHERE stock > 20 ORDER BY stock ASC LIMIT 3";
+                    $UpStockQuerysql = "SELECT itemName, stock FROM item WHERE stock > 20 ORDER BY stock ASC LIMIT 3";
                         $UpStockDetails=$conn->prepare($UpStockQuerysql);
                         $UpStockDetails->execute();
                    ?>

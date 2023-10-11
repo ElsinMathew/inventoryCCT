@@ -1,8 +1,9 @@
 <?php
 
 
-include_once("invConfig.php");
+
 include_once("../../inc/config/constants.php");
+include_once("./includes/config.php");
 
 // get invoice list
 function getInvoices() {
@@ -135,10 +136,13 @@ function popProductsList() {
 	$results = $mysqli->query($query);
 
 	if($results) {
+		
 		echo '<select class="form-control item-select">';
 		while($row = $results->fetch_assoc()) {
+		$maxDescriptionLength = 28; // Adjust this to your desired length
+        $description = strlen($row['description']) > $maxDescriptionLength ? substr($row['description'], 0, $maxDescriptionLength) . '...' : $row['description'];
 
-		    print '<option value="'.$row['unitPrice'].'">'.$row["itemName"].' - '.$row["description"].'</option>';
+		    print '<option value="'.$row['unitPrice'].'">'.$row["itemName"].' - '.$description.'</option>';
 		}
 		echo '</select>';
 
@@ -224,12 +228,14 @@ function getProducts() {
 	}
 
 	// the query
+	$selectedProductID = array();
 	$query = "SELECT * FROM item ORDER BY itemName ASC";
 
 	// mysqli select query
 	$results = $mysqli->query($query);
 
 	if($results) {
+		
 
 		print '<table class="table table-striped table-hover table-bordered" id="data-table"><thead><tr>
 
@@ -241,8 +247,10 @@ function getProducts() {
 			  </tr></thead><tbody>';
 
 		while($row = $results->fetch_assoc()) {
-
+ 			$maxDescriptionLength = 50; // Adjust this to your desired length
+            $description = strlen($row['description']) > $maxDescriptionLength ? substr($row['description'], 0, $maxDescriptionLength) . '...' : $row['description'];
 		    print '
+			
 			    <tr>
 					<td>'.$row["itemName"].'</td>
 				    <td>'.$row["description"].'</td>
@@ -250,6 +258,7 @@ function getProducts() {
 				    <td><a href="product-edit.php?id='.$row["productID"].'" class="btn btn-primary btn-xs"><span class="   -edit" aria-hidden="true"></span></a> <a data-product-id="'.$row['productID'].'" class="btn btn-danger btn-xs delete-product"><span class="   -trash" aria-hidden="true"></span></a></td>
 			    </tr>
 		    ';
+			$selectedProductID[]=$row;
 		}
 
 		print '</tr></tbody></table>';

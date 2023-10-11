@@ -496,7 +496,7 @@ $(document).ready(function() {
 					$("#response .message").html("<strong>" + data.status + "</strong>: " + data.message);
 					$("#response").removeClass("alert-warning").addClass("alert-success").fadeIn();
 					$("html, body").animate({ scrollTop: $('#response').offset().top }, 1000);
-					$("#create_invoice").before().html("<a href='../invoice-add.php' class='btn btn-primary'>Create new invoice</a>");
+					$("#create_invoice").before().html("<a href='invoice-create.php' class='btn btn-primary'>Create new invoice</a>");
 					$("#create_invoice").remove();
 					$btn.button("reset");
 				},

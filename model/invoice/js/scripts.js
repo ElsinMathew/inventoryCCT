@@ -302,7 +302,13 @@ $(document).ready(function() {
 	}
 
 	function calculateTotal() {
-	    
+	    var errorCounter = validateForm();
+
+		if (errorCounter > 0) {
+		    $("#response").removeClass("alert-success").addClass("alert-warning").fadeIn();
+		    $("#response .message").html("<strong>Error</strong>: It appear's you have forgotten to complete something!");
+		    $("html, body").animate({ scrollTop: $('#response').offset().top }, 1000);
+		} else{
 	    var grandTotal = 0,
 	    	disc = 0,
 	    	c_ship = parseInt($('.calculate.shipping').val()) || 0;
@@ -353,7 +359,7 @@ $(document).ready(function() {
             $('#invoice_total').val((finalTotal).toFixed(2));
 	    }
 
-	}
+	}}
 
 	function actionAddUser() {
 
@@ -496,7 +502,7 @@ $(document).ready(function() {
 					$("#response .message").html("<strong>" + data.status + "</strong>: " + data.message);
 					$("#response").removeClass("alert-warning").addClass("alert-success").fadeIn();
 					$("html, body").animate({ scrollTop: $('#response').offset().top }, 1000);
-					$("#create_invoice").before().html("<a href='../invoice-add.php' class='btn btn-primary'>Create new invoice</a>");
+					$("#create_invoice").before().html("<a href='../invoice .php' class='btn btn-primary'>Create new invoice</a>");
 					$("#create_invoice").remove();
 					$btn.button("reset");
 				},

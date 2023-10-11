@@ -1,7 +1,8 @@
 <?php
 
 
-include_once('includes/config.php');
+include_once('./includes/config.php');
+include_once("../../inc/config/constants.php");
 
 // show PHP errors
 ini_set('display_errors', 1);
@@ -214,22 +215,22 @@ if ($action == 'create_invoice'){
 
 	// invoice customer information
 	// billing
-	$customer_name = $_POST['customer_name']; // customer name
-	$customer_email = $_POST['customer_email']; // customer email
-	$customer_address_1 = $_POST['customer_address_1']; // customer address
-	$customer_address_2 = $_POST['customer_address_2']; // customer address
-	$customer_town = $_POST['customer_town']; // customer town
-	$customer_county = $_POST['customer_county']; // customer county
-	$customer_postcode = $_POST['customer_postcode']; // customer postcode
-	$customer_phone = $_POST['customer_phone']; // customer phone number
+	$customer_name = $_POST['fullName']; // customer name
+	$customer_email = $_POST['email']; // customer email
+	$customer_address_1 = $_POST['address']; // customer address
+	$customer_address_2 = $_POST['address2']; // customer address
+	$customer_town = $_POST['city']; // customer town
+	$customer_county = $_POST['district']; // customer county
+	$customer_postcode = $_POST['postcode']; // customer postcode
+	$customer_phone = $_POST['mobile']; // customer phone number
 	
 	//shipping
-	$customer_name_ship = $_POST['customer_name_ship']; // customer name (shipping)
-	$customer_address_1_ship = $_POST['customer_address_1_ship']; // customer address (shipping)
-	$customer_address_2_ship = $_POST['customer_address_2_ship']; // customer address (shipping)
-	$customer_town_ship = $_POST['customer_town_ship']; // customer town (shipping)
-	$customer_county_ship = $_POST['customer_county_ship']; // customer county (shipping)
-	$customer_postcode_ship = $_POST['customer_postcode_ship']; // customer postcode (shipping)
+	$customer_name_ship = $_POST['fullName']; // customer name (shipping)
+	$customer_address_1_ship = $_POST['address']; // customer address (shipping)
+	$customer_address_2_ship = $_POST['address']; // customer address (shipping)
+	$customer_town_ship = $_POST['city']; // customer town (shipping)
+	$customer_county_ship = $_POST['district']; // customer county (shipping)
+	$customer_postcode_ship = $_POST['postcode']; // customer postcode (shipping)
 
 	// invoice details
 	$invoice_number = $_POST['invoice_id']; // invoice number
@@ -247,7 +248,7 @@ if ($action == 'create_invoice'){
 	$invoice_status = $_POST['invoice_status']; // Invoice status
 
 	// insert invoice into database
-	$query = "INSERT INTO invoices (
+	/*$query = "INSERT INTO invoices (
 					invoice,
 					custom_email,
 					invoice_date, 
@@ -276,7 +277,7 @@ if ($action == 'create_invoice'){
 			    );
 			";
 	// insert customer details into database
-	$query .= "INSERT INTO customers (
+	"$query .= "INSERT INTO customer (
 					invoice,
 					name,
 					email,
@@ -310,9 +311,9 @@ if ($action == 'create_invoice'){
 					'".$customer_postcode_ship."'
 				);
 			";
-
+"*/
 	// invoice product items
-	foreach($_POST['invoice_product'] as $key => $value) {
+	/*foreach($_POST['invoice_product'] as $key => $value) {
 	    $item_product = $value;
 	    // $item_description = $_POST['invoice_product_desc'][$key];
 	    $item_qty = $_POST['invoice_product_qty'][$key];
@@ -338,7 +339,7 @@ if ($action == 'create_invoice'){
 			);
 		";
 
-	}
+	}*/
 
 	header('Content-Type: application/json');
 
@@ -355,7 +356,7 @@ if ($action == 'create_invoice'){
 		//Include Invoicr class
 		include('invoice.php');
 		//Create a new instance
-		$invoice = new invoicr("A4",CURRENCY,"en");
+		$invoice = new Invoice("A4",CURRENCY,"en");
 		//Set number formatting
 		$invoice->setNumberFormat('.',',');
 		//Set your logo
@@ -425,7 +426,7 @@ if ($action == 'create_invoice'){
 			'status' => 'Error',
 			'message' => 'There has been an error, please try again.'
 			// debug
-			//'message' => 'There has been an error, please try again.<pre>'.$mysqli->error.'</pre><pre>'.$query.'</pre>'
+			//message' => 'There has been an error, please try again.<pre>'.$mysqli->error.'</pre><pre>'.$query.'</pre>'
 		));
 	}
 
