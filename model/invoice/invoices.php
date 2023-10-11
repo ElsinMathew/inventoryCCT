@@ -155,7 +155,7 @@ $InvoiceId = $InvoiceDetailsSearchStatement->fetch(PDO::FETCH_ASSOC)['InvoiceNo'
                   $invoice_vat = $_POST['invoice_vat']; // invoice vat
                   $invoice_total = $_POST['invoice_total']; // invoice total
                   $invoice_notes = $_POST['invoice_notes']; // Invoice notes
-                  $invoice_type = $_POST['invoice_type']; // Invoice type
+                  $invoice_type = $_POST['invoiccd e_type']; // Invoice type
                   $invoice_status = $_POST['invoice_status']; // Invoice status
                 ?>
                   <div class="mb-4">

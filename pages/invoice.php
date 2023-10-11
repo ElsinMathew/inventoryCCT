@@ -100,7 +100,7 @@
     </aside>
     
     <div class="row mt-5 justify-content-center py-4">
-        <div class="col-lg-3"></div>
+        
         <div class="col-lg-5  rounded  mb-lg-0">
             <div class="">
                 <div class="card  rounded shadow pb-0 pt-3">
