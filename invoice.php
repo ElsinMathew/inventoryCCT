@@ -269,7 +269,7 @@
         </div>
  </div>
         
-        <div class="col-lg-4 float-right">
+        <div class="col-lg-4 float-right" style="left:8%">
             <div class="row">
                 <div class="col-xs-4 col-xs-offset-5">
                     <strong>Sub Total:</strong>
