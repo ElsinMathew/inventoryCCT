@@ -1,6 +1,7 @@
 <?php
 
 
+include_once("invConfig.php");
 include_once("../../inc/config/constants.php");
 
 // get invoice list
