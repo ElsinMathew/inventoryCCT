@@ -12,8 +12,16 @@
     <link href="../assets/css/nucleo-svg.css" rel="stylesheet" />
     <!-- Font Awesome Icons -->
     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link href="../assets/css/nucleo-svg.css" rel="stylesheet" />
     <!-- CSS Files -->
+    
     <link id="pagestyle" href="../assets/css/argon-dashboard.css?v=2.0.4" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
@@ -257,12 +265,13 @@
                                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                                 </a>
                                             </div>
-                                            <input type="text" class="form-control item-input invoice_product"
-                                                name="invoice_product[]"
-                                                placeholder="Enter Product Name OR Description">
+                                            <input type="text" class="form-control form-group-sm item-input invoice_product" 
+                                            id="invoice_product" 
+                                            name="invoice_product[]" 
+                                            placeholder="Enter Product Name OR Select">
                                             <div class="input-group-append">
-                                                <button class="btn btn-secondary" type="button"
-                                                    id="selectProduct">Select Product</button>
+                                                <input class="btn btn-secondary item-select" type="button"
+                                                    id="selectProduct ">Select Product>
                                             </div>
                                         </div>
                                     </td>
@@ -385,6 +394,9 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+
 
 </body>
 

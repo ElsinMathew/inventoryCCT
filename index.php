@@ -116,8 +116,8 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
             <span class="nav-link-text ms-1">Item</span>
           </a>
         </li>
-        <!-- <li class="nav-item">
-            <a class="nav-link" href="../pages/billing.html">
+        <li class="nav-item">
+            <a class="nav-link" href="./model/invoice/invoice-creation.php">
               <div
                 class="icon icon-shape icon-md border-radius-md text-center mb-1 d-flex align-tables-center justify-content-center"
               >
@@ -125,9 +125,9 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                   class="ni ni-credit-card text-success text-md opacity-10"
                 ></i>
               </div>
-              <span class="nav-link-text ms-1">Billing</span>
+              <span class="nav-link-text ms-1">Invoice</span>
             </a>
-          </li>-->
+          </li>
         <li class="nav-item">
           <a class="nav-link" href="">
             <div class="icon icon-shape icon-md border-radius-md text-center mb-1 d-flex align-tables-center justify-content-center">

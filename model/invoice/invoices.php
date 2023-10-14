@@ -124,14 +124,12 @@ $InvoiceId = $InvoiceDetailsSearchStatement->fetch(PDO::FETCH_ASSOC)['InvoiceNo'
                   <span class="badge bg-success font-size-12 ms-2">Paid</span>
                 </h4>
                 <?php if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                  $Customer_name = $_POST["customer_name"];
-                  $Customer_address_1 = $_POST["customer_address_1"];
-                  $Customer_town = $_POST["customer_town"];
-                  $Customer_postcode = $_POST["customer_postcode"];
-                  $Customer_email = $_POST["customer_email"];
-                  $Customer_address_2 = $_POST["customer_address_2"];
-                  $Customer_county = $_POST["customer_county"];
-                  $Customer_phone = $_POST["customer_phone"];
+                  $customer_name = $_POST["customer_name"];
+                  $customer_address_1 = $_POST["customer_address_1"];
+
+                  $customer_email = $_POST["customer_email"];
+
+                  $customer_phone = $_POST["customer_phone"];
 
                   $Invoice_product_price = $_POST["invoice_product_price"];
 
@@ -140,22 +138,19 @@ $InvoiceId = $InvoiceDetailsSearchStatement->fetch(PDO::FETCH_ASSOC)['InvoiceNo'
                   $Invoice_product_discount = $_POST["invoice_product_discount"];
                   $Invoice_subtotal = $_POST["invoice_subtotal"];
                   $Invoice_discount = $_POST["invoice_discount"];
-                  $Invoice_shipping = $_POST["invoice_shipping"];
+              
                   $Invoice_vat = $_POST["invoice_vat"];
                   $Invoice_total = $_POST["invoice_total"];
-                  $Custom_email = $_POST["custom_email"];
+
 
                   $invoice_number = $_POST['invoice_id']; // invoice number
-                  $custom_email = $_POST['custom_email']; // invoice custom email body
                   $invoice_date = $_POST['invoice_date']; // invoice date
-                  $custom_email = $_POST['custom_email']; // custom invoice email
+
                   $invoice_subtotal = $_POST['invoice_subtotal']; // invoice sub-total
-                  $invoice_shipping = $_POST['invoice_shipping']; // invoice shipping amount
                   $invoice_discount = $_POST['invoice_discount']; // invoice discount
-                  $invoice_vat = $_POST['invoice_vat']; // invoice vat
                   $invoice_total = $_POST['invoice_total']; // invoice total
-                  $invoice_notes = $_POST['invoice_notes']; // Invoice notes
-                  $invoice_type = $_POST['invoiccd e_type']; // Invoice type
+    
+                  $invoice_type = $_POST['invoice_type']; // Invoice type
                   $invoice_status = $_POST['invoice_status']; // Invoice status
                 ?>
                   <div class="mb-4">
@@ -178,12 +173,12 @@ $InvoiceId = $InvoiceDetailsSearchStatement->fetch(PDO::FETCH_ASSOC)['InvoiceNo'
                 <div class="col-sm-6">
                   <div class="text-muted">
                     <h5 class="font-size-16 mb-3">Billed To:</h5>
-                    <h5 class="font-size-15 mb-2"><?php echo $Customer_name ?></h5>
-                    <p class="mb-1"><?php echo $Customer_address_1 ?></p>
+                    <h5 class="font-size-15 mb-2"><?php echo $customer_name ?></h5>
+                    <p class="mb-1"><?php echo $customer_address_1 ?></p>
                     <p class="mb-1">
-                      <a href="/cdn-cgi/l/email-protection" class="cf_email" data-cfemail="0f7776754f363738216c6062"><?php echo $Customer_email ?></a>
+                      <a href="/cdn-cgi/l/email-protection" class="cf_email" data-cfemail="0f7776754f363738216c6062"><?php echo $customer_email ?></a>
                     </p>
-                    <p><?php echo  $Customer_phone ?></p>
+                    <p><?php echo  $customer_phone ?></p>
                   </div>
                 </div>
 
@@ -259,19 +254,13 @@ $InvoiceId = $InvoiceDetailsSearchStatement->fetch(PDO::FETCH_ASSOC)['InvoiceNo'
 
                       </tr>
 
-                      <tr>
-                        <th scope="row" colspan="4" class="border-0 text-end">
-                          Shipping Charge :
-                        </th>
-                        <td class="border-0 text-end"><?php echo $Invoice_shipping ?></td>
 
-                      </tr>
 
                       <tr>
                         <th scope="row" colspan="4" class="border-0 text-end">
-                          Tax
+                          GST Amt
                         </th>
-                        <td class="border-0 text-end"><?php echo $Invoice_vat ?></td>
+                        <td class="border-0 text-end"><?php echo $Invoice_vat ?> </td>
 
                       </tr>
 
@@ -307,12 +296,12 @@ $InvoiceId = $InvoiceDetailsSearchStatement->fetch(PDO::FETCH_ASSOC)['InvoiceNo'
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
   <script type="text/javascript"></script>
   <script>
-    /*function printAfterDelay() {
+    function printAfterDelay() {
       setTimeout(function() {
         window.print();
-      }, 2000);
+      }, 1000);
     }
-    window.addEventListener('load', printAfterDelay); */
+    window.addEventListener('load', printAfterDelay); 
   </script>
 
 </body>

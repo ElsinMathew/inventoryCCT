@@ -203,7 +203,6 @@
                       
                       <!-- Your HTML code with modified button colors -->
                       <button type="submit" id="login" class="btn btn-outline-primary custom-button">Login</button>
-                      <a href="sign-up.php" class="btn btn-outline-danger custom-button">Reset Password</a>
                       <button type="reset" id="clearButton" class="btn btn-outline-secondary  custom-button">Clear</button>
                     </form>
                   </div>
