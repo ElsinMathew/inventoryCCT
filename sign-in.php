@@ -1,68 +1,62 @@
 <?php
-    session_start();
-    require_once('./inc/config/constants.php');
-    require_once('./inc/config/db.php');
+session_start();
+require_once('./inc/config/constants.php');
+require_once('./inc/config/db.php');
 
-    $loginUsername = '';
-    $loginPassword = '';
+$loginUserEmail = '';
+$loginPassword = '';
 
-    // Initialize the resetPasswordMessage variable
-    $resetPasswordMessage = '';
+// Initialize the resetPasswordMessage variable
+$resetPasswordMessage = '';
 
-    if(isset($_POST['loginUsername'])){
-        $loginUsername = $_POST['loginUsername'];
-        $loginPassword = $_POST['loginPassword'];
+if (isset($_POST['loginUserEmail'])) {
+    $loginUserEmail = $_POST['loginUserEmail'];
+    $loginPassword = $_POST['loginPassword'];
 
-        if(!empty($loginUsername) && !empty($loginUsername)){
+    if (!empty($loginUserEmail) && !empty($loginPassword)) {
 
-            // Sanitize username
-            $loginUsername = filter_var($loginUsername, FILTER_SANITIZE_STRING);
+        // Sanitize email
+        $loginUserEmail = filter_var($loginUserEmail, FILTER_SANITIZE_EMAIL);
 
-            // Check if username is empty
-            if($loginUsername == ''){
-                $resetPasswordMessage = '<div class="alert alert-danger">Please enter Username</div>';
-                
-               
-            }
-
-            // Check if password is empty
-            if($loginPassword == ''){
-                $resetPasswordMessage = '<div class="alert alert-danger">Please enter Password</div>';
-            }
-
-            // Check the given credentials
-            $checkUserSql = 'SELECT * FROM user WHERE username = :username AND password = :password';
-            $checkUserStatement = $conn->prepare($checkUserSql);
-            $checkUserStatement->execute(['username' => $loginUsername, 'password' => $loginPassword]);
-
-            // Check if user exists or not
-            if($checkUserStatement->rowCount() > 0){
-                // Valid credentials. Hence, start the session
-                $row = $checkUserStatement->fetch(PDO::FETCH_ASSOC);
-
-                $_SESSION['loggedIn'] = '1';
-                $_SESSION['fullName'] = $row['fullName'];
-
-                $resetPasswordMessage = '<div class="alert alert-success">Login success! Redirecting you to the home page...</div>';
-                
-                echo '<script>
-                    var redirectDelay = 2000; // 2 seconds
-                    setTimeout(function() {
-                        window.location.href = "index.php";
-                    }, redirectDelay);
-                  </script>';
-               
-            } else {
-                $resetPasswordMessage = '<div class="alert alert-danger">Incorrect Username / Password</div>';
-
-            }
-        } else {
-            $resetPasswordMessage = '<div class="alert alert-danger">Please enter Username and Password</div>';
-
+        // Check if email is empty
+        if ($loginUserEmail == '') {
+            $resetPasswordMessage = '<div class="alert alert-danger">Please enter Email</div>';
         }
-    }
-?>
 
+        // Check if password is empty
+        if ($loginPassword == '') {
+            $resetPasswordMessage = '<div class="alert alert-danger">Please enter Password</div>';
+        }
+
+        // Check the given credentials
+        $checkUserSql = 'SELECT * FROM user WHERE userEmail = :userEmail AND password = :password';
+        $checkUserStatement = $conn->prepare($checkUserSql);
+        $checkUserStatement->execute(['userEmail' => $loginUserEmail, 'password' => $loginPassword]);
+
+        // Check if user exists or not
+        if ($checkUserStatement->rowCount() > 0) {
+            // Valid credentials. Hence, start the session
+            $row = $checkUserStatement->fetch(PDO::FETCH_ASSOC);
+
+            $_SESSION['loggedIn'] = '1';
+            $_SESSION['fullName'] = $row['fullName'];
+
+            $resetPasswordMessage = '<div class="alert alert-success">Login success! Redirecting you to the home page...</div>';
+
+            echo '<script>
+                var redirectDelay = 2000; // 2 seconds
+                setTimeout(function() {
+                    window.location.href = "index.php";
+                }, redirectDelay);
+            </script>';
+        } else {
+            $resetPasswordMessage = '<div class="alert alert-danger">Incorrect Email / Password</div>';
+        }
+    } else {
+        $resetPasswordMessage = '<div class="alert alert-danger">Please enter Email and Password</div>';
+    }
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -132,7 +126,7 @@
                 <ul class="navbar-nav mx-auto">
                   
                   <li class="nav-item">
-                    <a class="nav-link me-2" href="sign-up.php">
+                    <a class="nav-link me-2" href="forgotPassword.php">
                       <i
                         class="fas fa-user-circle opacity-6 text-dark me-1"
                       ></i>
@@ -175,8 +169,8 @@
                     <form method="POST" action="" class="form-control-lg">
                      
                       <div class="form-group">
-                        <label for="loginUsername">Username</label>
-                        <input type="text" class="form-control " id="loginUsername" name="loginUsername" value="<?php echo $loginUsername; ?>">
+                        <label for="loginUserEmail">Email</label>
+                        <input type="text" class="form-control " id="loginUserEmail" name="loginUserEmail" value="<?php echo $loginUserEmail; ?>">
                       </div>
                       <div class="form-group">
                         <label for="loginPassword">Password</label>

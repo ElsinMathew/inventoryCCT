@@ -24,7 +24,7 @@ define('INVOICE_INITIAL_VALUE', '1'); // Initial invoice order number (start of 
 define('INVOICE_THEME', '#222222'); 
 define('TIMEZONE', 'Kolkata/Asia'); 
 define('DATE_FORMAT', 'DD/MM/YYYY'); // DD/MM/YYYY or MM/DD/YYYY
-define('CURRENCY', '$'); // Currency symbol
+define('CURRENCY', '₹'); // Currency symbol
 define('ENABLE_VAT', true); // Enable TAX/VAT
 define('VAT_INCLUDED', false); // Is VAT included or excluded?
 define('VAT_RATE', '18'); // This is the percentage value

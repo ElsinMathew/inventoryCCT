@@ -25,41 +25,34 @@ $DisabledCustomersStatement = $conn->prepare($DisabledCustomersSql);
 $DisabledCustomersStatement->execute();
 $DisabledCustomersCount = $DisabledCustomersStatement->fetch(PDO::FETCH_ASSOC)['disabledCustomers'];
 
-$activeVendorsSql = 'SELECT COUNT(*) as activeVendors FROM vendor WHERE status="Active"';
-$activeVendorsStatement = $conn->prepare($activeVendorsSql);
-$activeVendorsStatement->execute();
-$activeVendorsCount = $activeVendorsStatement->fetch(PDO::FETCH_ASSOC)['activeVendors'];
 
-$DisabledVendorsSql = 'SELECT COUNT(*) as disabledVendors FROM vendor WHERE status="Disabled"';
-$DisabledVendorsStatement = $conn->prepare($DisabledVendorsSql);
-$DisabledVendorsStatement->execute();
-$DisabledVendorsCount = $DisabledVendorsStatement->fetch(PDO::FETCH_ASSOC)['disabledVendors'];
-
-$saleTotalProfitSql = 'SELECT SUM(unitPrice) as TotalProfit FROM sale';
+$saleTotalProfitSql = 'SELECT SUM(total) as TotalProfit FROM sale';
 $saleTotalProfitStatement = $conn->prepare($saleTotalProfitSql);
 $saleTotalProfitStatement->execute();
 $saleTotalProfit = $saleTotalProfitStatement->fetch(PDO::FETCH_ASSOC)['TotalProfit'];
 
-$saleTotalProductsSql = 'SELECT SUM(quantity) as TotalProducts FROM sale';
+$saleTotalProductsSql = 'SELECT SUM(stock) as TotalProducts FROM item';
 $saleTotalProductsStatement = $conn->prepare($saleTotalProductsSql);
 $saleTotalProductsStatement->execute();
 $saleTotalProducts = $saleTotalProductsStatement->fetch(PDO::FETCH_ASSOC)['TotalProducts'];
 
-$purchaseTotalCostSql = 'SELECT SUM(unitPrice) as totalCost FROM purchase';
+$purchaseTotalCostSql = 'SELECT SUM(price) as totalCost FROM line_items';
 $purchaseTotalCostStatement = $conn->prepare($purchaseTotalCostSql);
 $purchaseTotalCostStatement->execute();
 $purchaseTotalCost = $purchaseTotalCostStatement->fetch(PDO::FETCH_ASSOC)['totalCost'];
 
 $highestSalesQuery = "
-  SELECT DAY(saleDate) AS day, SUM(quantity) AS totalSales
-  FROM sale
-  WHERE YEAR(saleDate) = 2023 AND MONTH(saleDate) = 8
+  SELECT DAY(s.saleDate) AS day, SUM(li.quantity) AS totalSales
+  FROM sale AS s
+  JOIN line_items AS li ON s.saleID = li.invoice_id
+  WHERE YEAR(s.saleDate) = 2023 AND MONTH(s.saleDate) = 10
   GROUP BY day
   ORDER BY totalSales DESC
   LIMIT 1";
 $highestSalesStatement = $conn->prepare($highestSalesQuery);
 $highestSalesStatement->execute();
 $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
+
 
 ?>
 
@@ -117,23 +110,20 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
           </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="./model/invoice/invoice-creation.php">
-              <div
-                class="icon icon-shape icon-md border-radius-md text-center mb-1 d-flex align-tables-center justify-content-center"
-              >
-                <i
-                  class="ni ni-credit-card text-success text-md opacity-10"
-                ></i>
-              </div>
-              <span class="nav-link-text ms-1">Invoice</span>
-            </a>
-          </li>
+          <a class="nav-link" href="./model/invoice/invoice-creation.php">
+            <div class="icon icon-shape icon-md border-radius-md text-center mb-1 d-flex align-tables-center justify-content-center">
+              <i class="ni ni-credit-card text-success text-md opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Invoice</span>
+          </a>
+        </li>
+
         <li class="nav-item">
-          <a class="nav-link" href="">
+          <a class="nav-link" href="pages/Invoices.php">
             <div class="icon icon-shape icon-md border-radius-md text-center mb-1 d-flex align-tables-center justify-content-center">
               <i class="ni ni-app text-info text-md opacity-10"></i>
             </div>
-            <span class="nav-link-text ms-1">Search</span>
+            <span class="nav-link-text ms-1">Manage Invoices</span>
           </a>
         </li>
         <li class="nav-item">
@@ -152,6 +142,7 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
             <span class="nav-link-text ms-1">Logout</span>
           </a>
         </li>
+
       </ul>
     </div>
   </aside>
@@ -191,8 +182,8 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                 <div class="col-8">
                   <div class="numbers">
                     <p class="text-sm mb-0 text-uppercase font-weight-bold">
-                      Total Profit </p>
-                    <h5 class="font-weight-bolder">$<?php echo number_format($totalProfit, 2); ?></h5>
+                      Total Sales </p>
+                    <h5 class="font-weight-bolder">₹<?php echo number_format($saleTotalProfit, 2); ?></h5>
                     <p class="mb-0">
                       <span class="text-success text-sm font-weight-bolder">+55%</span>
                       since last week
@@ -218,7 +209,7 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                     <p class="text-sm mb-0 text-uppercase font-weight-bold">
                       Customers
                     </p>
-                    <h5 class="font-weight-bolder"><?php echo $activeCustomersCount; ?></h5>
+                    <h5 class="font-weight-bolder"><?php echo $activeCustomersCount; ?>+</h5>
                     <p class="mb-0">
                       <span class="text-success text-sm font-weight-bolder">+3%</span>
                       since last week
@@ -266,9 +257,9 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                 <div class="col-8">
                   <div class="numbers">
                     <p class="text-sm mb-0 text-uppercase font-weight-bold">
-                      Total Sales
+                      Total Products
                     </p>
-                    <h5 class="font-weight-bolder"><?php echo number_format($saleTotalProfit);  ?> Products</h5>
+                    <h5 class="font-weight-bolder"><?php echo number_format($saleTotalProducts);  ?>+ Products</h5>
                     <p class="mb-0">
                       <span class="text-success text-sm font-weight-bolder">+5%</span>
                       than last month
@@ -299,7 +290,7 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
 
               <p class="text-sm mb-0">
                 <i class="fa fa-arrow-up text-success"></i>
-                <span class="font-weight-bold"><?php echo date("F j, Y", strtotime("2023-08-$highestSalesDay")); ?></span>
+                <span class="font-weight-bold"><?php echo date("F j, Y", strtotime("2023-10-$highestSalesDay")); ?></span>
               </p>
 
             </div>
@@ -317,14 +308,16 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                 <h6 class="mb-2">Best Selling Products</h6>
               </div>
             </div>
-            <?php $recentProductsQuery = "WITH RankedSales AS (SELECT
-            s.itemNumber,
-            i.itemName,
-            s.quantity,
-            s.discount,
-            s.unitPrice  AS VALUE,
-            ROW_NUMBER() OVER (ORDER BY s.quantity DESC) AS RowNum FROM sale s JOIN item i ON s.ITEMNUMBER = i.ITEMNUMBER )
-            SELECT itemName,discount,value FROM RankedSales LIMIT 6;";
+            <?php $recentProductsQuery = "WITH RankedSales AS (
+    SELECT li.item_id, i.itemName,i.unitPrice, i.discount, SUM(li.quantity) AS total_quantity
+    FROM line_items li
+    JOIN item i ON li.item_id = i.productID
+    GROUP BY li.item_id, i.itemName, i.discount,i.unitPrice
+    ORDER BY total_quantity DESC
+    LIMIT 6
+)
+SELECT itemName, discount,unitPrice, total_quantity
+FROM RankedSales";
             $recentProductsStatement = $conn->prepare($recentProductsQuery);
             $recentProductsStatement->execute();
             $recentProductsData = $recentProductsStatement->fetchAll(PDO::FETCH_ASSOC); ?>
@@ -352,7 +345,7 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                       <td>
                         <div class="text-center">
                           <p class="text-xs font-weight-bold mb-0">Value:</p>
-                          <h6 class="text-sm mb-0">$<?php echo number_format($product['value'], 2); ?></h6>
+                          <h6 class="text-sm mb-0">₹<?php echo number_format($product['unitPrice'], 2); ?></h6>
                         </div>
                       </td>
                     </tr>
@@ -378,22 +371,22 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                     <div class="icon icon-shape icon-sm me-3 bg-gradient-dark shadow text-center">
                       <i class="ni ni-mobile-button text-white opacity-10 text-sm"></i>
                     </div>
-                  
+
                     <?php  // for stock
                     $categoriesQuerysql = 'Select SUM(stock) as total_stock from item ';
-                    $stockDetails=$conn->prepare($categoriesQuerysql);
+                    $stockDetails = $conn->prepare($categoriesQuerysql);
                     $stockDetails->execute();
-                    $stockDetailsItem=$stockDetails->fetch(PDO::FETCH_ASSOC);  
+                    $stockDetailsItem = $stockDetails->fetch(PDO::FETCH_ASSOC);
 
                     //for sold 
-                    $SoldQuerysql = 'Select SUM(quantity) as total_sold from sale ';
-                    $SoldDetails=$conn->prepare($SoldQuerysql);
+                    $SoldQuerysql = 'Select SUM(quantity) as total_sold from line_items ';
+                    $SoldDetails = $conn->prepare($SoldQuerysql);
                     $SoldDetails->execute();
-                    $SoldDetailsItem=$SoldDetails->fetch(PDO::FETCH_ASSOC);
+                    $SoldDetailsItem = $SoldDetails->fetch(PDO::FETCH_ASSOC);
                     ?>
                     <div class="d-flex flex-column">
                       <h6 class="mb-1 text-dark text-sm">Merchandise</h6>
-                      <span class="text-xs"><?php echo number_format($stockDetailsItem['total_stock']); ?> in Stock, 
+                      <span class="text-xs"><?php echo number_format($stockDetailsItem['total_stock']); ?> in Stock,
                         <span class="font-weight-bold"><?php echo number_format($SoldDetailsItem['total_sold']); ?> +sold</span></span>
                     </div>
                   </div>
@@ -411,7 +404,7 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                     <div class="d-flex flex-column">
                       <h6 class="mb-1 text-dark text-sm">Customers</h6>
                       <span class="text-xs"><?php echo $activeCustomersCount; ?> active,
-                        <span class="font-weight-bold"><?php echo $DisabledCustomersCount; ?>  closed</span></span>
+                        <span class="font-weight-bold"><?php echo $DisabledCustomersCount; ?> closed</span></span>
                     </div>
                   </div>
                   <div class="d-flex">
@@ -425,10 +418,26 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                     <div class="icon icon-shape icon-sm me-3 bg-gradient-dark shadow text-center">
                       <i class="ni ni-box-2 text-white opacity-10 text-sm"></i>
                     </div>
+                    <?php 
+                    $activeVendorsSql = 'SELECT COUNT(*) as activeVendors FROM sale WHERE invoiceType="open"';
+$activeVendorsStatement = $conn->prepare($activeVendorsSql);
+$activeVendorsStatement->execute();
+$activeVendorsCount = $activeVendorsStatement->fetch(PDO::FETCH_ASSOC)['activeVendors'];
+
+$DisabledVendorsSql = 'SELECT COUNT(*) as disabledVendors FROM sale WHERE invoiceType="paid"';
+$DisabledVendorsStatement = $conn->prepare($DisabledVendorsSql);
+$DisabledVendorsStatement->execute();
+$DisabledVendorsCount = $DisabledVendorsStatement->fetch(PDO::FETCH_ASSOC)['disabledVendors'];
+
+$soldVendorsSql = 'SELECT SUM(quantity) as soldVendors FROM line_items';
+$soldVendorsStatement = $conn->prepare($soldVendorsSql);
+$soldVendorsStatement->execute();
+$soldVendorsCount = $soldVendorsStatement->fetch(PDO::FETCH_ASSOC)['soldVendors'];?>
+
                     <div class="d-flex flex-column">
-                      <h6 class="mb-1 text-dark text-sm">Vendors</h6>
-                      <span class="text-xs"><?php echo $activeVendorsCount; ?> active,
-                        <span class="font-weight-bold"><?php echo $DisabledVendorsCount; ?> disabled</span></span>
+                      <h6 class="mb-1 text-dark text-sm">Invoices</h6>
+                      <span class="text-xs"><?php echo $activeVendorsCount; ?> open,
+                        <span class="font-weight-bold"><?php echo $DisabledVendorsCount; ?> paid</span></span>
                     </div>
                   </div>
                   <div class="d-flex">
@@ -443,8 +452,10 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                       <i class="ni ni-satisfied text-white opacity-10 text-sm"></i>
                     </div>
                     <div class="d-flex flex-column">
-                      <h6 class="mb-1 text-dark text-sm">Total Sales</h6>
-                      <span class="text-xs font-weight-bold">+<?php echo $saleTotalProducts; ?></span>
+                      <h6 class="mb-1 text-dark text-sm">Sales</h6>
+                      <span class="text-xs font-weight-bold">+<?php echo $saleTotalProducts; ?>,
+                      <span class="font-weight-bold"><?php echo $soldVendorsCount; ?> sold</span></span>
+                      
                     </div>
                   </div>
                   <div class="d-flex">
@@ -467,49 +478,49 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
                 <div class="col-md-6 d-flex justify-content-end align-items-center">
                   <i class="far fa-calendar-alt me-2"></i>
                   <?php $StockQuerysql = "SELECT itemName, stock FROM item WHERE stock < 10 ORDER BY stock ASC LIMIT 3";
-                    $StockDetails=$conn->prepare($StockQuerysql);
-                    $StockDetails->execute();
-                    $UpStockQuerysql = "SELECT itemName, stock FROM item WHERE stock > 20 ORDER BY stock ASC LIMIT 3";
-                        $UpStockDetails=$conn->prepare($UpStockQuerysql);
-                        $UpStockDetails->execute();
-                   ?>
+                  $StockDetails = $conn->prepare($StockQuerysql);
+                  $StockDetails->execute();
+                  $UpStockQuerysql = "SELECT itemName, stock FROM item WHERE stock > 20 ORDER BY stock ASC LIMIT 3";
+                  $UpStockDetails = $conn->prepare($UpStockQuerysql);
+                  $UpStockDetails->execute();
+                  ?>
                 </div>
               </div>
             </div>
             <div class="card-body  p-3">
               <ul class="list-group">
-              <?php while( $StockDetailsItem=$StockDetails->fetch(PDO::FETCH_ASSOC)) { ?>
-                <li class="list-group-item border-0 d-flex justify-content-between ps-0  border-radius-lg">
-                  <div class="d-flex align-items-center">
-                    <button class="btn btn-icon-only btn-rounded btn-outline-danger mb-0 me-3 btn-sm d-flex align-items-center justify-content-center"><i class="fas fa-arrow-down"></i></button>
-                    <div class="d-flex flex-column">
-                    
-                      <h6 class="mb-1 text-dark text-sm"><?php echo $StockDetailsItem['itemName']; ?></h6>
-                      <span class="text-xs">stock need to be refilled</span>
+                <?php while ($StockDetailsItem = $StockDetails->fetch(PDO::FETCH_ASSOC)) { ?>
+                  <li class="list-group-item border-0 d-flex justify-content-between ps-0  border-radius-lg">
+                    <div class="d-flex align-items-center">
+                      <button class="btn btn-icon-only btn-rounded btn-outline-danger mb-0 me-3 btn-sm d-flex align-items-center justify-content-center"><i class="fas fa-arrow-down"></i></button>
+                      <div class="d-flex flex-column">
+
+                        <h6 class="mb-1 text-dark text-sm"><?php echo $StockDetailsItem['itemName']; ?></h6>
+                        <span class="text-xs">stock need to be refilled</span>
+                      </div>
                     </div>
-                  </div>
-                  <div class="d-flex align-items-center text-danger text-gradient text-sm font-weight-bold">
-                  -<?php echo $StockDetailsItem['stock']; ?>
-                  </div>
-                </li>
+                    <div class="d-flex align-items-center text-danger text-gradient text-sm font-weight-bold">
+                      -<?php echo $StockDetailsItem['stock']; ?>
+                    </div>
+                  </li>
                 <?php }; ?>
-                <?php while( $UpStockDetailsItem=$UpStockDetails->fetch(PDO::FETCH_ASSOC)) { ?>
-                <li class="list-group-item border-0 d-flex justify-content-between ps-0  border-radius-lg">
-              
-                  <div class="d-flex align-items-center">
-                    <button class="btn btn-icon-only btn-rounded btn-outline-success mb-0 me-3 btn-sm d-flex align-items-center justify-content-center"><i class="fas fa-arrow-up"></i></button>
-                    <div class="d-flex flex-column">
-                      <h6 class="mb-1 text-dark text-sm"><?php echo $UpStockDetailsItem['itemName']; ?></h6>
-                      <span class="text-xs">stock is upto date</span>
+                <?php while ($UpStockDetailsItem = $UpStockDetails->fetch(PDO::FETCH_ASSOC)) { ?>
+                  <li class="list-group-item border-0 d-flex justify-content-between ps-0  border-radius-lg">
+
+                    <div class="d-flex align-items-center">
+                      <button class="btn btn-icon-only btn-rounded btn-outline-success mb-0 me-3 btn-sm d-flex align-items-center justify-content-center"><i class="fas fa-arrow-up"></i></button>
+                      <div class="d-flex flex-column">
+                        <h6 class="mb-1 text-dark text-sm"><?php echo $UpStockDetailsItem['itemName']; ?></h6>
+                        <span class="text-xs">stock is upto date</span>
+                      </div>
                     </div>
-                  </div>
-                  <div class="d-flex align-items-center text-success text-gradient text-sm font-weight-bold">
-                 + <?php echo $UpStockDetailsItem['stock']; ?>
-                  </div>
+                    <div class="d-flex align-items-center text-success text-gradient text-sm font-weight-bold">
+                      + <?php echo $UpStockDetailsItem['stock']; ?>
+                    </div>
                   <?php }; ?>
-                </li>
-  
-          
+                  </li>
+
+
 
 
 
@@ -527,21 +538,26 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
   <script src="./assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="./assets/js/plugins/chartjs.min.js"></script>
   <?php
-  $salesDayOfWeekQuery = "
-    SELECT DAYOFWEEK(saleDate) AS dayOfWeek, SUM(quantity) AS totalSales
-    FROM sale
-    GROUP BY dayOfWeek";
-  // Execute the query
-  $salesDayOfWeekStatement = $conn->prepare($salesDayOfWeekQuery);
-  $salesDayOfWeekStatement->execute();
-  $salesData = $salesDayOfWeekStatement->fetchAll(PDO::FETCH_ASSOC);
-  $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  $salesByDayOfWeek = array_fill(0, 0, 0);
+  
+$salesDayOfWeekQuery = "
+SELECT DAYOFWEEK(s.saleDate) AS dayOfWeek, SUM(li.quantity) AS totalSales
+FROM line_items li
+JOIN sale s ON s.saleID=li.invoice_id
+GROUP BY dayOfWeek";
 
-  foreach ($salesData as $row) {
-    $dayOfWeek = $row['dayOfWeek'] - 1;
-    $salesByDayOfWeek[$dayOfWeek] = (float) $row['totalSales'];
-  }
+
+$salesDayOfWeekStatement = $conn->prepare($salesDayOfWeekQuery);
+$salesDayOfWeekStatement->execute();
+$salesData = $salesDayOfWeekStatement->fetchAll(PDO::FETCH_ASSOC);
+
+$daysOfWeek = [ 'Sunday','Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+$salesByDayOfWeek = array_fill(0, 7, 0); 
+
+foreach ($salesData as $row) {
+  $dayOfWeek = $row['dayOfWeek'] - 1;
+  $salesByDayOfWeek[$dayOfWeek] = (float) $row['totalSales'];
+}
+
   ?>
   <script>
     var daysOfWeek = <?php echo json_encode($daysOfWeek); ?>;
@@ -559,13 +575,14 @@ $highestSalesData = $highestSalesStatement->fetch(PDO::FETCH_ASSOC);
       type: "line",
       data: {
         labels: [
+          "Sunday",
           "Monday",
           "Tuesday",
           "Wednesday",
           "Thursday",
           "Friday",
           "Saturday",
-          "Sunday",
+          
         ],
         datasets: [{
           label: "Product Sales",
