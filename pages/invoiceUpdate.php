@@ -1,116 +1,86 @@
 <?php
-include('functions.php');
-include_once("../../inc/config/constants.php");
-require_once('../../inc/config/db.php');
+include_once("../inc/config/constants.php");
+require_once('../inc/config/db.php');
 
 
 
 ?>
 <?php
 session_start();
-// Redirect the user to login page if he is not logged in.
 if (!isset($_SESSION['loggedIn'])) {
-  header('Location: ../../sign-in.php');
+  header('Location: ../sign-in.php');
   exit();
 }
 ?>
 <?php
-require_once('../../inc/config/constants.php');
-require_once('../../inc/config/db.php');
-$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+require_once('../inc/config/constants.php');
+require_once('../inc/config/db.php');
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $customer_name = $_POST["customer_name"];
-  $customer_address_1 = $_POST["customer_address_1"];
-  $customer_email = $_POST["customer_email"];
-  $customer_phone = $_POST["customer_phone"];
-  $invoice_product_price = $_POST["invoice_product_price"];
-  $invoice_date = $_POST["invoice_date"];
-  $invoice_product_qty = $_POST["invoice_product_qty"];
-  $invoice_product_discount = $_POST["invoice_product_discount"];
-  $invoice_subtotal = $_POST["invoice_subtotal"];
-  $invoice_discount = $_POST["invoice_discount"];
-  $invoice_vat = $_POST["invoice_vat"];
-  $invoice_total = $_POST["invoice_total"];
-  $invoice_number = $_SESSION['invoiceNumber'];
-  $invoice_type = $_POST["invoice_status"];
-  $invoice_date = $_POST['invoice_date'];
-  $invoice_subtotal = $_POST['invoice_subtotal'];
-  $invoice_discount = $_POST['invoice_discount'];
-  $invoice_total = $_POST['invoice_total'];
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['invoice_id']) && is_numeric($_POST['invoice_id'])) {
+    $invoiceID = $_POST['invoice_id'];
+    $customer_name = $_POST['customer_name'];
+    $customer_email = $_POST['customer_email'];
+    $customer_address_1 = $_POST['customer_address_1'];
+    $customer_phone = $_POST['customer_phone'];
+    $invoice_date = $_POST['invoice_date'];
+    $invoice_subtotal = $_POST['invoice_subtotal'];
+    $invoice_discount = $_POST['invoice_discount'];
+    $invoice_total = $_POST['invoice_total'];
+    $invoice_type = $_POST['invoice_type'];
+    $invoice_vat = $invoice_total * 0.18;
+    $invoice_status = $_POST['invoice_type'];
 
-  $fetchCustomerIDQuery = "SELECT customerID FROM customer WHERE fullName = ? AND email = ?";
-  $stmtCustomerID = mysqli_prepare($conn, $fetchCustomerIDQuery);
-  mysqli_stmt_bind_param($stmtCustomerID, "ss", $customer_name, $customer_email);
-  mysqli_stmt_execute($stmtCustomerID);
-  mysqli_stmt_bind_result($stmtCustomerID, $customerID);
-  mysqli_stmt_fetch($stmtCustomerID);
-  mysqli_stmt_close($stmtCustomerID);
-  
-  // Use interpolated values in the SQL query
-  $insertSaleQuery = "INSERT INTO sale (customerID, customerName, customerMobile, customerEmail, customerAddress, invoiceType, invoiceNumber, saleDate, invoiceStatus, subtotal, discount, total)
-  VALUES ('$customerID', '$customer_name', '$customer_phone', '$customer_email', '$customer_address_1', '$invoice_type', '$invoice_number', '$invoice_date', '$invoice_type', '$invoice_subtotal', '$invoice_discount', '$invoice_total')";
-  
-  $stmtInsertSale = mysqli_prepare($conn, $insertSaleQuery);
-  
-  if (mysqli_stmt_execute($stmtInsertSale)) {
-    $invoice_id = mysqli_insert_id($conn);
-    
-  }
-    foreach ($_POST['invoice_product'] as $key => $value) {
-      // Trim whitespace from the product name
-      $item_product = trim($value);
-
-      // Extract the first part of the product name (up to the first space or hyphen)
-      $item_product = preg_replace('/\s*[-].*/', '', $item_product);
-
-      // Check if invoice_product_qty and invoice_product_price are set
-      if (isset($_POST['invoice_product_qty'][$key]) && isset($_POST['invoice_product_price'][$key])) {
-        $item_qty = $_POST['invoice_product_qty'][$key];
-        $item_price = $_POST['invoice_product_price'][$key];
-        $item_discount = $_POST['invoice_product_discount'][$key];
-
-        // Fetch the itemID based on the modified product name (case-insensitive)
-        $fetchItemSql = "SELECT productID FROM item WHERE itemName = ?";
-
-        $stmt = mysqli_prepare($conn, $fetchItemSql);
-        mysqli_stmt_bind_param($stmt, 's', $item_product);
-
-        if (mysqli_stmt_execute($stmt)) {
-          $fetchItemResult = mysqli_stmt_get_result($stmt);
-          if ($fetchItemResult && $itemData = mysqli_fetch_assoc($fetchItemResult)) {
-            $itemID = $itemData['productID'];
-            
-            // Insert the line item into the line_items table
-            $lineItemSql = "INSERT INTO line_items (invoice_id, item_id, product_name, quantity, price, discount)
-                            VALUES (?, ?, ?, ?, ?, ?)";
-            
-            $stmt = mysqli_prepare($conn, $lineItemSql);
-
-            // Bind parameters
-            mysqli_stmt_bind_param($stmt, 'iissid', $invoice_id, $itemID, $item_product, $item_qty, $item_price, $item_discount);
-
-            if (mysqli_stmt_execute($stmt)) {
-              // Line item inserted successfully
-         
-            } else {
-              echo "Error inserting line item: " . mysqli_error($conn);
-            }
-          } else {
-            echo "Error fetching itemID for product: $item_product (Data not found in the database)";
-          }
-        } else {
-          echo "Error executing the fetch query for product: $item_product";
-        }
-      }
+    try {
+        $conn = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASSWORD);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e) {
+        echo "Connection failed: " . $e->getMessage();
+        exit();
     }
-  } else {
-    echo "Error inserting sale record: " . mysqli_error($conn);
 
-  }
-  mysqli_close($conn);
+    $fetchInvoiceNumberQuery = "SELECT invoiceNumber FROM sale WHERE saleID = :invoiceID";
+    $stmtFetchInvoiceNumber = $conn->prepare($fetchInvoiceNumberQuery);
+    $stmtFetchInvoiceNumber->bindParam(':invoiceID', $invoiceID, PDO::PARAM_INT);
+    $stmtFetchInvoiceNumber->execute();
+    $invoice_number = $stmtFetchInvoiceNumber->fetchColumn();
 
+    $updateSaleQuery = "UPDATE sale SET 
+        customerName = :customer_name,
+        customerEmail = :customer_email,
+        customerAddress = :customer_address_1,
+        customerMobile = :customer_phone,
+        saleDate = :invoice_date,
+        subtotal = :invoice_subtotal,
+        discount = :invoice_discount,
+        total = :invoice_total,
+        invoiceType = :invoice_type,
+        invoiceStatus = :invoice_status
+        WHERE saleID = :invoiceID";
+
+    $stmtUpdateSale = $conn->prepare($updateSaleQuery);
+    $stmtUpdateSale->bindParam(':customer_name', $customer_name, PDO::PARAM_STR);
+    $stmtUpdateSale->bindParam(':customer_email', $customer_email, PDO::PARAM_STR);
+    $stmtUpdateSale->bindParam(':customer_address_1', $customer_address_1, PDO::PARAM_STR);
+    $stmtUpdateSale->bindParam(':customer_phone', $customer_phone, PDO::PARAM_STR);
+    $stmtUpdateSale->bindParam(':invoice_date', $invoice_date, PDO::PARAM_STR);
+    $stmtUpdateSale->bindParam(':invoice_subtotal', $invoice_subtotal, PDO::PARAM_STR);
+    $stmtUpdateSale->bindParam(':invoice_discount', $invoice_discount, PDO::PARAM_STR);
+    $stmtUpdateSale->bindParam(':invoice_total', $invoice_total, PDO::PARAM_STR);
+    $stmtUpdateSale->bindParam(':invoice_type', $invoice_type, PDO::PARAM_STR);
+    $stmtUpdateSale->bindParam(':invoice_status', $invoice_status, PDO::PARAM_STR);
+    $stmtUpdateSale->bindParam(':invoiceID', $invoiceID, PDO::PARAM_INT);
+
+    if ($stmtUpdateSale->execute()) {
+      
+    } else {
+        echo "Error updating invoice: " . $stmtUpdateSale->errorInfo()[2];
+    }
+} else {
+    echo "Invalid or missing data.";
+}
 ?>
+
+
 
 
 <html lang="en">
@@ -118,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
   <meta charset="utf-8" />
   <html lang="en">
-<link rel="icon" type="image/png" href="../../assets/img/CCTWhiteLOGO.png" class="h-100 w-30" />
+<link rel="icon" type="image/png" href="../assets/img/CCTWhiteLOGO.png" class="h-100 w-30" />
   <title>WDI AUG@2023</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -242,7 +212,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <div class="col-lg-8">
         <div class="card">
 
-          <img class="Logo" src="../../assets/img/CCTlogo.png" alt="Logo">
+          <img class="Logo" src="../assets/img/CCTlogo.png" alt="Logo">
           <h1 class="heading mt-4">Calanjiyam Consultancies <br>and Technologies</h1>
           <div class="card-body">
             <div class="certificate" id="download">
@@ -270,7 +240,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                   </p>
                   <p><i class="uil uil-phone me-1"></i>9360223419</p>
                   <div class="water2"> SAMPLE</div>
-                  <div class="watermark2"> <img src="../../assets/img/CCTlogo.png" alt=""></div>
+                  <div class="watermark2"> <img src="../assets/img/CCTlogo.png" alt=""></div>
                 </div>
               </div>
               <hr class="my-4" />
@@ -402,12 +372,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
   <script type="text/javascript"></script>
   <script>
-    /*function printAfterDelay() {
+    function printAfterDelay() {
       setTimeout(function() {
         window.print();
       }, 1000);
     }
-    window.addEventListener('load', printAfterDelay);*/
+    window.addEventListener('load', printAfterDelay);
   </script>
 
 </body>

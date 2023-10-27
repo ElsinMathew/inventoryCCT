@@ -129,7 +129,7 @@ function popProductsList()
     }
 
     // Query to retrieve product data
-    $query = "SELECT * FROM item ORDER BY itemName ASC";
+    $query = "SELECT * FROM item WHERE stock > 0 ORDER BY itemName ASC";
 
     // Execute the query
     $results = $mysqli->query($query);

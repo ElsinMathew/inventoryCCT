@@ -35,7 +35,6 @@ if (isset($_POST['loginUserEmail'])) {
 
         // Check if user exists or not
         if ($checkUserStatement->rowCount() > 0) {
-            // Valid credentials. Hence, start the session
             $row = $checkUserStatement->fetch(PDO::FETCH_ASSOC);
 
             $_SESSION['loggedIn'] = '1';

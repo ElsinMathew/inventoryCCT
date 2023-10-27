@@ -1,5 +1,8 @@
 <?php
 session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 'on');
+
 // Redirect the user to login page if he is not logged in.
 if (!isset($_SESSION['loggedIn'])) {
   header('Location: sign-in.php');
@@ -418,21 +421,21 @@ FROM RankedSales";
                     <div class="icon icon-shape icon-sm me-3 bg-gradient-dark shadow text-center">
                       <i class="ni ni-box-2 text-white opacity-10 text-sm"></i>
                     </div>
-                    <?php 
+                    <?php
                     $activeVendorsSql = 'SELECT COUNT(*) as activeVendors FROM sale WHERE invoiceType="open"';
-$activeVendorsStatement = $conn->prepare($activeVendorsSql);
-$activeVendorsStatement->execute();
-$activeVendorsCount = $activeVendorsStatement->fetch(PDO::FETCH_ASSOC)['activeVendors'];
+                    $activeVendorsStatement = $conn->prepare($activeVendorsSql);
+                    $activeVendorsStatement->execute();
+                    $activeVendorsCount = $activeVendorsStatement->fetch(PDO::FETCH_ASSOC)['activeVendors'];
 
-$DisabledVendorsSql = 'SELECT COUNT(*) as disabledVendors FROM sale WHERE invoiceType="paid"';
-$DisabledVendorsStatement = $conn->prepare($DisabledVendorsSql);
-$DisabledVendorsStatement->execute();
-$DisabledVendorsCount = $DisabledVendorsStatement->fetch(PDO::FETCH_ASSOC)['disabledVendors'];
+                    $DisabledVendorsSql = 'SELECT COUNT(*) as disabledVendors FROM sale WHERE invoiceType="paid"';
+                    $DisabledVendorsStatement = $conn->prepare($DisabledVendorsSql);
+                    $DisabledVendorsStatement->execute();
+                    $DisabledVendorsCount = $DisabledVendorsStatement->fetch(PDO::FETCH_ASSOC)['disabledVendors'];
 
-$soldVendorsSql = 'SELECT SUM(quantity) as soldVendors FROM line_items';
-$soldVendorsStatement = $conn->prepare($soldVendorsSql);
-$soldVendorsStatement->execute();
-$soldVendorsCount = $soldVendorsStatement->fetch(PDO::FETCH_ASSOC)['soldVendors'];?>
+                    $soldVendorsSql = 'SELECT SUM(quantity) as soldVendors FROM line_items';
+                    $soldVendorsStatement = $conn->prepare($soldVendorsSql);
+                    $soldVendorsStatement->execute();
+                    $soldVendorsCount = $soldVendorsStatement->fetch(PDO::FETCH_ASSOC)['soldVendors']; ?>
 
                     <div class="d-flex flex-column">
                       <h6 class="mb-1 text-dark text-sm">Invoices</h6>
@@ -452,10 +455,23 @@ $soldVendorsCount = $soldVendorsStatement->fetch(PDO::FETCH_ASSOC)['soldVendors'
                       <i class="ni ni-satisfied text-white opacity-10 text-sm"></i>
                     </div>
                     <div class="d-flex flex-column">
-                      <h6 class="mb-1 text-dark text-sm">Sales</h6>
-                      <span class="text-xs font-weight-bold">+<?php echo $saleTotalProducts; ?>,
-                      <span class="font-weight-bold"><?php echo $soldVendorsCount; ?> sold</span></span>
-                      
+                      <?php
+                      $StockDetailssql = "SELECT SUM(stock) AS saleTotalProducts FROM item WHERE stock < 10 ORDER BY stock ASC LIMIT 3";
+                      $StockDetailsCat = $conn->prepare($StockDetailssql);
+                      $StockDetailsCat->execute();
+                      $StockDetailsCategory = $StockDetailsCat->fetch(PDO::FETCH_ASSOC)['saleTotalProducts'];
+                      ?>
+                      <?php
+                      $StockDetailssql = "SELECT SUM(stock) AS saleTotalProducts FROM item WHERE stock > 10 ORDER BY stock ASC LIMIT 3";
+                      $StockDetailsCat = $conn->prepare($StockDetailssql);
+                      $StockDetailsCat->execute();
+                      $StockDetailsCate = $StockDetailsCat->fetch(PDO::FETCH_ASSOC)['saleTotalProducts'];
+                      ?>
+
+                      <h6 class="mb-1 text-dark text-sm">Stocks</h6>
+                      <span class="text-xs font-weight-bold"> <?php echo  $StockDetailsCategory; ?> Low↓,
+                        <span class="font-weight-bold"><?php echo $StockDetailsCate; ?> High↑</span></span>
+
                     </div>
                   </div>
                   <div class="d-flex">
@@ -519,11 +535,6 @@ $soldVendorsCount = $soldVendorsStatement->fetch(PDO::FETCH_ASSOC)['soldVendors'
                     </div>
                   <?php }; ?>
                   </li>
-
-
-
-
-
               </ul>
             </div>
           </div>
@@ -538,25 +549,25 @@ $soldVendorsCount = $soldVendorsStatement->fetch(PDO::FETCH_ASSOC)['soldVendors'
   <script src="./assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="./assets/js/plugins/chartjs.min.js"></script>
   <?php
-  
-$salesDayOfWeekQuery = "
+
+  $salesDayOfWeekQuery = "
 SELECT DAYOFWEEK(s.saleDate) AS dayOfWeek, SUM(li.quantity) AS totalSales
 FROM line_items li
 JOIN sale s ON s.saleID=li.invoice_id
 GROUP BY dayOfWeek";
 
 
-$salesDayOfWeekStatement = $conn->prepare($salesDayOfWeekQuery);
-$salesDayOfWeekStatement->execute();
-$salesData = $salesDayOfWeekStatement->fetchAll(PDO::FETCH_ASSOC);
+  $salesDayOfWeekStatement = $conn->prepare($salesDayOfWeekQuery);
+  $salesDayOfWeekStatement->execute();
+  $salesData = $salesDayOfWeekStatement->fetchAll(PDO::FETCH_ASSOC);
 
-$daysOfWeek = [ 'Sunday','Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-$salesByDayOfWeek = array_fill(0, 7, 0); 
+  $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  $salesByDayOfWeek = array_fill(0, 7, 0);
 
-foreach ($salesData as $row) {
-  $dayOfWeek = $row['dayOfWeek'] - 1;
-  $salesByDayOfWeek[$dayOfWeek] = (float) $row['totalSales'];
-}
+  foreach ($salesData as $row) {
+    $dayOfWeek = $row['dayOfWeek'] - 1;
+    $salesByDayOfWeek[$dayOfWeek] = (float) $row['totalSales'];
+  }
 
   ?>
   <script>
@@ -582,7 +593,7 @@ foreach ($salesData as $row) {
           "Thursday",
           "Friday",
           "Saturday",
-          
+
         ],
         datasets: [{
           label: "Product Sales",
